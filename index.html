@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SMC Attendance Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="SMC Attendance Tracker">
+      <img src="images/smc-logo.jpg" alt="NSPM logo">
+      <span>ICT · Service Management Centre</span>
+    </a>
+    <span class="connection-label">Free prototype</span>
+  </header>
+
+  <main>
+    <section id="welcomeView" class="welcome-screen">
+      <div class="welcome-content">
+        <img class="welcome-logo" src="images/smc-logo.jpg" alt="NSPM logo">
+        <p class="welcome-label">ICT · SERVICE MANAGEMENT CENTRE</p>
+        <h1>SMC Attendance Tracker</h1>
+        <p class="welcome-copy">Sign in to check in and view your work record.</p>
+        <div class="welcome-actions">
+          <button class="welcome-button" type="button" data-auth-mode="signin">Sign in</button>
+          <button class="light-button" type="button" data-auth-mode="signup">Create account</button>
+        </div>
+        <p class="organization-name">Nigerian Security Printing &amp; Minting Plc · ICT-SMC Unit</p>
+      </div>
+    </section>
+
+    <section id="authView" class="panel auth-panel hidden">
+      <button class="text-button" type="button" data-view="welcomeView">← Back</button>
+      <div id="authMessage" class="status-box hidden" role="status"></div>
+
+      <nav class="auth-tabs" aria-label="Account options">
+        <button type="button" data-auth-mode="signin">Sign in</button>
+        <button type="button" data-auth-mode="signup">Create account</button>
+      </nav>
+
+      <form id="signInForm" class="form-grid">
+        <p class="eyebrow">STAFF SIGN IN</p>
+        <h2>Welcome back</h2>
+        <label>Email or full name
+          <input id="loginIdentifier" autocomplete="username" required placeholder="Email address or name">
+        </label>
+        <label>Password
+          <input id="loginPassword" type="password" autocomplete="current-password" required placeholder="Your password">
+        </label>
+        <button id="signInButton" class="primary-button" type="submit">Sign in</button>
+      </form>
+
+      <form id="signUpForm" class="form-grid hidden">
+        <p class="eyebrow">NEW STAFF ACCOUNT</p>
+        <h2>Create account</h2>
+
+        <label>Full name
+          <input id="signupName" autocomplete="name" required placeholder="Enter your name">
+        </label>
+
+        <label>Email
+          <input id="signupEmail" type="email" autocomplete="email" required placeholder="name@example.com">
+        </label>
+
+        <label>Password
+          <input id="signupPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters">
+        </label>
+
+        <label>Department
+          <input value="ICT Department" readonly>
+        </label>
+
+        <label>Staff type
+          <select id="staffType" required>
+            <option value="">Choose a type</option>
+            <option value="Corps member">Corps member</option>
+            <option value="IT student">IT student</option>
+          </select>
+        </label>
+
+        <label>CDS / weekly off day
+          <select id="offDay" required>
+            <option value="">Choose a weekday</option>
+            <option>Monday</option>
+            <option>Tuesday</option>
+            <option>Wednesday</option>
+            <option>Thursday</option>
+            <option>Friday</option>
+          </select>
+        </label>
+
+        <div class="face-enroll-card">
+          <h3>Face enrollment</h3>
+          <p>Allow camera access, position your face in the frame, then capture your enrollment face.</p>
+          <video id="signupVideo" class="camera-preview hidden" autoplay playsinline muted></video>
+          <div class="button-row">
+            <button id="startSignupCamera" class="outline-button" type="button">Open camera</button>
+            <button id="captureSignupFace" class="primary-button" type="button" disabled>Capture face</button>
+          </div>
+          <p id="signupFaceStatus" class="tiny-note">No face enrolled yet.</p>
+          <label class="consent-line">
+            <input id="faceConsent" type="checkbox" required>
+            <span>I agree to use a face template for this prototype attendance check.</span>
+          </label>
+        </div>
+
+        <button id="createAccountButton" class="primary-button" type="submit">Create account</button>
+        <p class="tiny-note">Accounts can sign in without admin approval. If names are shared, sign in with email.</p>
+      </form>
+    </section>
+
+    <section id="staffView" class="hidden">
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">STAFF DASHBOARD</p>
+          <h2>Hello, <span id="staffName"></span> 👋</h2>
+        </div>
+        <button id="signOutButton" class="outline-button" type="button">Sign out</button>
+      </div>
+
+      <nav class="page-tabs" aria-label="Staff pages">
+        <button type="button" data-page="attendancePage">Attendance</button>
+        <button type="button" data-page="evaluationPage">Evaluation</button>
+      </nav>
+
+      <section id="attendancePage">
+        <div class="stats-grid">
+          <article class="stat-card purple">
+            <span>This week</span><strong id="staffWeekCount">0</strong><small>days attended</small>
+          </article>
+          <article class="stat-card orange">
+            <span>This month</span><strong id="staffMonthCount">0</strong><small>days attended</small>
+          </article>
+          <article class="stat-card green">
+            <span>Off day</span><strong id="staffOffDay">—</strong><small>not counted as absence</small>
+          </article>
+        </div>
+
+        <div class="content-grid">
+          <section class="panel attendance-panel">
+            <p class="eyebrow">TODAY</p>
+            <h2>Attendance</h2>
+            <p id="todayDate"></p>
+            <div id="attendanceMessage" class="status-box">Check-in uses GPS near the NSPM site.</div>
+            <button id="checkLocationButton" class="outline-button" type="button">Check my location</button>
+
+            <div id="checkinFaceBox" class="face-enroll-card hidden">
+              <p>Location is in range. Look at the camera and capture your face.</p>
+              <video id="checkinVideo" class="camera-preview" autoplay playsinline muted></video>
+              <button id="captureCheckinFace" class="primary-button" type="button">Verify face and check in</button>
+            </div>
+
+            <p class="tiny-note">GPS checks proximity to the site, not whether someone is inside. Browser face matching is a prototype and can be bypassed.</p>
+          </section>
+
+          <section class="panel week-panel">
+            <p class="eyebrow">YOUR WEEK</p>
+            <h2>Attendance at a glance</h2>
+            <div id="weekList" class="week-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="evaluationPage" class="hidden">
+        <div class="panel">
+          <p class="eyebrow">MONTH-END EVALUATION</p>
+          <h2>Your attendance summary</h2>
+          <label>Month
+            <input id="staffEvaluationMonth" type="month">
+          </label>
+          <p id="staffEvaluationSummary" class="status-box">Choose a month to view your attendance and rating.</p>
+          <div id="staffRatingDisplay" class="rating-display"></div>
+        </div>
+      </section>
+    </section>
+
+    <section id="adminView" class="hidden">
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">ADMIN DASHBOARD</p>
+          <h2>SMC team attendance</h2>
+        </div>
+        <button id="adminSignOutButton" class="outline-button" type="button">Sign out</button>
+      </div>
+
+      <nav class="page-tabs" aria-label="Admin pages">
+        <button type="button" data-page="adminAttendancePage">Attendance</button>
+        <button type="button" data-page="adminEvaluationPage">Monthly evaluations</button>
+      </nav>
+
+      <section id="adminAttendancePage">
+        <div class="stats-grid">
+          <article class="stat-card purple">
+            <span>Staff accounts</span><strong id="adminStaffTotal">0</strong><small>registered staff</small>
+          </article>
+          <article class="stat-card orange">
+            <span>Check-ins this week</span><strong id="adminWeekTotal">0</strong><small>records</small>
+          </article>
+          <article class="stat-card green">
+            <span>Check-ins today</span><strong id="adminTodayTotal">0</strong><small>records</small>
+          </article>
+        </div>
+
+        <section class="panel">
+          <div class="table-heading">
+            <div><p class="eyebrow">ATTENDANCE LOG</p><h2>Recent check-ins</h2></div>
+            <input id="adminMonth" type="month" aria-label="Filter by month">
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Type</th><th>Date</th><th>Time</th><th>Checks</th></tr>
+              </thead>
+              <tbody id="adminAttendanceRows"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="adminEvaluationPage" class="hidden">
+        <section class="panel">
+          <p class="eyebrow">MONTH-END RATINGS</p>
+          <h2>Rate a staff member</h2>
+
+          <div class="evaluation-form">
+            <label>Month
+              <input id="ratingMonth" type="month" required>
+            </label>
+            <label>Staff member
+              <select id="ratingStaff" required>
+                <option value="">Choose staff</option>
+              </select>
+            </label>
+            <label>Rating
+              <select id="ratingValue" required>
+                <option value="">Choose rating</option>
+                <option value="5">5 · Excellent</option>
+                <option value="4">4 · Very good</option>
+                <option value="3">3 · Satisfactory</option>
+                <option value="2">2 · Needs improvement</option>
+                <option value="1">1 · Unsatisfactory</option>
+              </select>
+            </label>
+            <label>Comment
+              <textarea id="ratingComment" rows="3" maxlength="500" placeholder="Optional monthly comment"></textarea>
+            </label>
+            <button id="saveRatingButton" class="primary-button" type="button">Save evaluation</button>
+          </div>
+
+          <div id="adminEvaluationRows" class="evaluation-list"></div>
+        </section>
+      </section>
+
+      <p class="tiny-note">Admins use the same sign-in form. Only the account marked as admin in Supabase opens this page.</p>
+    </section>
+  </main>
+
+  <footer>SMC · Service Management Centre · ICT Department</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/human/dist/human.js"></script>
+  <script src="supabase-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
